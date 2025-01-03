@@ -1,16 +1,16 @@
 package com.example.todoprojectdevelop.service;
 
 import com.example.todoprojectdevelop.config.PasswordEncoder;
+import com.example.todoprojectdevelop.config.error.CustomException;
+import com.example.todoprojectdevelop.config.error.ErrorCode;
 import com.example.todoprojectdevelop.dto.SignUpResponseDto;
 import com.example.todoprojectdevelop.dto.UserResponseDto;
 import com.example.todoprojectdevelop.entity.User;
 import com.example.todoprojectdevelop.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,8 +27,8 @@ public class UserService {
     // 유저 생성
     public SignUpResponseDto signUp(String email, String password,  String userName) {
 
-        if (userRepository.findByEmail(email) != null) {
-            throw new RuntimeException("이미 존재하는 이메일입니다.");
+        if (userRepository.findByEmail(email).isPresent()) {
+            throw new CustomException(ErrorCode.EMAIL_EXIST);
         }
         User user = new User(email, password, userName);
         User savedUser = userRepository.save(user); // Repository에 저장
@@ -44,20 +44,17 @@ public class UserService {
         if(userName == null && email == null) {
             userList = userRepository.findAll();
         } else if(userName == null) {
-            User findUser = userRepository.findByEmail(email);
-            log.info(findUser.getEmail());
+            User findUser = userRepository.findByEmail(email).
+                    orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER)); // NPE 방지
             userList.add(findUser);
-//            userList.add(userRepository.findByEmail(email));
         } else if(email == null) {
-            userList = userRepository.findByUserName(userName);
+            User findUser = userRepository.findByUserName(userName).
+                    orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER)); // NPE 방지
+            userList.add(findUser);
         } else {
-            userList = userRepository.findByUserNameAndEmail(userName, email);
-        }
-
-        // NPE 방지
-        if (userList.isEmpty()) {
-            log.info("isEmpty");
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+            User findUser = userRepository.findByUserNameAndEmail(userName, email).
+                    orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER)); // NPE 방지
+            userList.add(findUser);
         }
 
         List<UserResponseDto> userResponseDtoList =
@@ -70,32 +67,34 @@ public class UserService {
 
     // 특정 유저 조회
     public UserResponseDto findByUserId(Long userId) {
-        User user = userRepository.findByUserIdOrElseThrow(userId);
+        User user = userRepository.findById(userId).
+                orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER)); // NPE 방지
         return new UserResponseDto(user);
     }
 
     // 유저 수정
     @Transactional
     public UserResponseDto updateUser(Long userId, String userEmail, String userName) {
-        User user = userRepository.findByUserIdOrElseThrow(userId);
+        User user = userRepository.findById(userId).
+                orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER)); // NPE 방지
 
         // 이메일 수정
         if(userEmail != null) {
             user.updateEmail(userEmail);
         }
-
         // 이름 수정
         if(userName != null) {
             user.updateName(userName);
         }
-        userRepository.flush();
 
+        userRepository.flush();
         return new UserResponseDto(user);
     }
 
     // 유저 삭제
     public void deleteUser(Long userId) {
-        User user = userRepository.findByUserIdOrElseThrow(userId);
+        User user = userRepository.findById(userId).
+                orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER)); // NPE 방지
 
         userRepository.delete(user);
     }
@@ -103,14 +102,17 @@ public class UserService {
     // 유저 로그인
     public Boolean login(String email, String password) {
         // DB에 저장된 인코딩된 비밀번호를 가져옴
-        String encodedPassword = userRepository.findByEmail(email).getPassword();
+        User findUser = userRepository.findByEmail(email).
+                orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER)); // NPE 방지
+        String encodedPassword = findUser.getPassword();
         // 비밀번호가 일치하면 true
         return bcrypt.matches(password, encodedPassword);
     }
 
     // 이메일로 유저 조회
     public UserResponseDto findByEmail(String email) {
-        User findUser = userRepository.findByEmail(email);
+        User findUser = userRepository.findByEmail(email).
+                orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER)); // NPE 방지
         return new UserResponseDto(findUser);
     }
 

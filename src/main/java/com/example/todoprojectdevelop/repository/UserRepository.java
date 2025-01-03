@@ -5,14 +5,14 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.List;
+import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Long> {
 
     // 유저 조회
-    User findByEmail(String email);
-    List<User> findByUserName(String userName);
-    List<User> findByUserNameAndEmail(String userName, String email);
+    Optional<User> findByEmail(String email);
+    Optional<User> findByUserName(String userName);
+    Optional<User> findByUserNameAndEmail(String userName, String email);
 
     default User findByUserIdOrElseThrow(Long userId) {
         return findById(userId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Does not exitst id = " + userId));
