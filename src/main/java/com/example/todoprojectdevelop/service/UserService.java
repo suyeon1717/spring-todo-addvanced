@@ -56,6 +56,7 @@ public class UserService {
 
         // NPE 방지
         if (userList.isEmpty()) {
+            log.info("isEmpty");
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
 
