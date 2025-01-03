@@ -6,6 +6,7 @@ import com.example.todoprojectdevelop.dto.UserResponseDto;
 import com.example.todoprojectdevelop.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -27,7 +28,7 @@ public class SessionUserController {
     // 로그인
     @PostMapping("/login")
     public ResponseEntity<UserResponseDto> login(
-            @RequestBody LoginRequestDto dto,
+            @RequestBody @Valid LoginRequestDto dto,
             HttpServletRequest request
     ) {
         if(!userService.login(dto.getEmail(), dto.getPassword())) { // 로그인 실행

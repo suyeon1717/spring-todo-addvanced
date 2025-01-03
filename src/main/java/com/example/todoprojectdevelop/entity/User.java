@@ -1,7 +1,6 @@
 package com.example.todoprojectdevelop.entity;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
 import lombok.Getter;
 
 @Getter
@@ -13,7 +12,6 @@ public class User extends BaseEntity{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Email //import jakarta.validation.constraints.Email;
     @Column(nullable = false, unique = true)
     private String email;
 

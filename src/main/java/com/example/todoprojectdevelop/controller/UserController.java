@@ -7,10 +7,12 @@ import com.example.todoprojectdevelop.dto.UserResponseDto;
 import com.example.todoprojectdevelop.dto.UserUpdateRequestDto;
 import com.example.todoprojectdevelop.repository.UserRepository;
 import com.example.todoprojectdevelop.service.UserService;
-import jakarta.validation.constraints.Email;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,8 +27,10 @@ public class UserController {
     private final PasswordEncoder bcrypt;
 
     // 유저 생성
-    @PostMapping("/signup")
-    public ResponseEntity<SignUpResponseDto> signUp(@RequestBody SignUpRequestDto requestDto) {
+    @PostMapping("/sign-up")
+    public ResponseEntity<SignUpResponseDto> signUp(
+            @RequestBody @Valid SignUpRequestDto requestDto
+    ) {
         SignUpResponseDto signUpResponseDto = userService.signUp(
                 requestDto.getEmail(),
                 bcrypt.encode(requestDto.getPassword()),
@@ -37,10 +41,11 @@ public class UserController {
     }
 
     // 전체 유저 조회
+    @Validated
     @GetMapping
     public ResponseEntity<List<UserResponseDto>> findAll(
             @RequestParam (required = false) String userName,
-            @Email @RequestParam (required = false) String email
+            @RequestParam (required = false) @Pattern(regexp = "^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$") String email
     ) {
         List<UserResponseDto> userResponseDtoList = userService.findAll(userName, email);
 
@@ -49,7 +54,9 @@ public class UserController {
 
     // 특정 유저 조회
     @GetMapping("/{userId}")
-    public ResponseEntity<UserResponseDto> findByUserId(@PathVariable Long userId) {
+    public ResponseEntity<UserResponseDto> findByUserId(
+            @PathVariable Long userId
+    ) {
         UserResponseDto userResponseDto = userService.findByUserId(userId);
 
         return new ResponseEntity<>(userResponseDto, HttpStatus.OK);
@@ -59,8 +66,8 @@ public class UserController {
     @PatchMapping("/{userId}")
     public ResponseEntity<UserResponseDto> updateUser(
             @PathVariable Long userId,
-            @RequestBody UserUpdateRequestDto requestDto
-            ) {
+            @RequestBody @Valid UserUpdateRequestDto requestDto
+    ) {
         UserResponseDto userResponseDto = userService.updateUser(userId, requestDto.getEmail(), requestDto.getUserName());
         return new ResponseEntity<>(userResponseDto, HttpStatus.OK);
     }

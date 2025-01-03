@@ -4,6 +4,7 @@ import com.example.todoprojectdevelop.dto.TodoPageResponseDto;
 import com.example.todoprojectdevelop.dto.TodoRequestDto;
 import com.example.todoprojectdevelop.dto.TodoResponseDto;
 import com.example.todoprojectdevelop.service.TodoService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -22,7 +23,10 @@ public class TodoController {
 
     // 일정 생성
     @PostMapping
-    public ResponseEntity<TodoResponseDto> save(@SessionAttribute(USER_ID) Long userId, @RequestBody TodoRequestDto requestDto) {
+    public ResponseEntity<TodoResponseDto> save(
+            @SessionAttribute(USER_ID) Long userId,
+            @RequestBody @Valid TodoRequestDto requestDto
+    ) {
 
         TodoResponseDto todoResponseDto = todoService.save( //service 요청
                 requestDto.getTitle(),
@@ -60,7 +64,7 @@ public class TodoController {
     @PatchMapping("/{todoId}")
     public ResponseEntity<TodoResponseDto> updateTodo(
             @PathVariable Long todoId,
-            @RequestBody TodoRequestDto requestDto
+            @RequestBody @Valid TodoRequestDto requestDto
     ) {
         TodoResponseDto todoResponseDto = todoService.updateTodo(todoId, requestDto.getTitle(), requestDto.getContents());
         return new ResponseEntity<>(todoResponseDto, HttpStatus.OK);

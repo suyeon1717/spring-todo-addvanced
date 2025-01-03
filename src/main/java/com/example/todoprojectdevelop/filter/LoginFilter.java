@@ -13,7 +13,7 @@ import java.io.IOException;
 public class LoginFilter implements Filter {
 
     // 회원가입, 로그인 요청은 인증 처리에서 제외
-    private static final String[] WHITE_LIST = {"/users/signup", "/login", "/logout"};
+    private static final String[] WHITE_LIST = {"/users/sign-up", "/login", "/logout"};
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
@@ -41,9 +41,9 @@ public class LoginFilter implements Filter {
             }
 
         }
-        log.info("로그인 성공1"); // doFilter 전
+//        log.info("로그인 성공1"); // doFilter 전
         chain.doFilter(request, response);
-        log.info("로그인 성공2"); // 루프를 돌고옴
+//        log.info("로그인 성공2"); // 루프를 돌고옴
     }
 
     public boolean isWhiteList(String requestURI) {

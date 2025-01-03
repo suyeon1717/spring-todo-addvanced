@@ -6,14 +6,17 @@ import com.example.todoprojectdevelop.dto.UserResponseDto;
 import com.example.todoprojectdevelop.entity.User;
 import com.example.todoprojectdevelop.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -36,12 +39,13 @@ public class UserService {
     // 전체 유저 조회
     public List<UserResponseDto> findAll(String userName, String email) {
 
-        List<User> userList = null;
+        List<User> userList = new ArrayList<>();
 
         if(userName == null && email == null) {
             userList = userRepository.findAll();
         } else if(userName == null) {
             User findUser = userRepository.findByEmail(email);
+            log.info(findUser.getEmail());
             userList.add(findUser);
 //            userList.add(userRepository.findByEmail(email));
         } else if(email == null) {
