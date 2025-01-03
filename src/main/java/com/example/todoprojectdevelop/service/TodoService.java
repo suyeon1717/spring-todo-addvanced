@@ -1,5 +1,7 @@
 package com.example.todoprojectdevelop.service;
 
+import com.example.todoprojectdevelop.config.error.CustomException;
+import com.example.todoprojectdevelop.config.error.ErrorCode;
 import com.example.todoprojectdevelop.dto.TodoPageResponseDto;
 import com.example.todoprojectdevelop.dto.TodoResponseDto;
 import com.example.todoprojectdevelop.entity.Todo;
@@ -29,7 +31,8 @@ public class TodoService {
     // 일정 생성
     public TodoResponseDto save(String title, String contents, Long userId) {
 
-        User findUser = userRepository.findByUserIdOrElseThrow(userId);
+        User findUser = userRepository.findById(userId).
+                orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER)); // NPE 방지
 
         Todo todo = new Todo(title, contents);
         todo.setUser(findUser);
@@ -66,7 +69,8 @@ public class TodoService {
     // 선택 일정 조회 -> 일정은 하나 뿐이라 페이지 의미 없음, response만 page response 형태로
     public TodoPageResponseDto findByTodoId(Long todoId) {
 
-        Todo todo = todoRepository.findBytodoIdOrElseThrow(todoId);
+        Todo todo = todoRepository.findById(todoId).
+                orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER)); // NPE 방지
 
         return new TodoPageResponseDto(todo, commentRepository.countAllByTodoId(todoId), todo.getUser().getUserName());
     }
@@ -74,7 +78,8 @@ public class TodoService {
     // 선택 일정 수정
     @Transactional
     public TodoResponseDto updateTodo(Long todoId, String title, String contents) {
-        Todo todo = todoRepository.findBytodoIdOrElseThrow(todoId);
+        Todo todo = todoRepository.findById(todoId).
+                orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER)); // NPE 방지
 
         // 제목 수정
         if(title != null){
@@ -92,7 +97,8 @@ public class TodoService {
 
     // 선택 일정 삭제
     public void deleteTodo(Long todoId) {
-        Todo todo = todoRepository.findBytodoIdOrElseThrow(todoId);
+        Todo todo = todoRepository.findById(todoId).
+                orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER)); // NPE 방지
 
         todoRepository.delete(todo);
     }
