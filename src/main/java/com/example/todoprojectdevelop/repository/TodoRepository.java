@@ -15,8 +15,4 @@ public interface TodoRepository extends JpaRepository<Todo, Long> {
     // 전체 일정 조회 (Param O)
     Page<Todo> findByModifiedAtBetweenOrUserId(Pageable pageable, LocalDateTime startOfDay, LocalDateTime endOfDay, Long userId);
 
-//    // 선택 일정 조회
-//    default Todo findBytodoIdOrElseThrow(Long todoId) {
-//        return findById(todoId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Does not exitst id = " + todoId));
-//    }
 }

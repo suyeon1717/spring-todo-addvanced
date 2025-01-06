@@ -1,5 +1,7 @@
 package com.example.todoprojectdevelop.service;
 
+import com.example.todoprojectdevelop.config.error.CustomException;
+import com.example.todoprojectdevelop.config.error.ErrorCode;
 import com.example.todoprojectdevelop.dto.CommentResponseDto;
 import com.example.todoprojectdevelop.dto.MyCommnetsResponseDto;
 import com.example.todoprojectdevelop.entity.Comment;
@@ -25,8 +27,10 @@ public class CommentService {
 
     // 댓글 작성
     public CommentResponseDto save(Long userId, Long todoId, String contents) {
-        User user = userRepository.findByUserIdOrElseThrow(userId);
-        Todo todo = todoRepository.findBytodoIdOrElseThrow(todoId);
+        User user = userRepository.findById(userId).
+            orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_USER));
+        Todo todo = todoRepository.findById(todoId).
+            orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_TODO));
 
         Comment comment = new Comment(contents);
         comment.setTodo(todo);
@@ -63,7 +67,8 @@ public class CommentService {
     @Transactional
     // 댓글 수정
     public CommentResponseDto updateComment(Long userId, Long commentId, String contents) {
-        Comment comment = commentRepository.findByCommentIdOrElseThrow(commentId);
+        Comment comment = commentRepository.findById(commentId).
+            orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_COMMENT));;
 
         if(!comment.getUser().getId().equals(userId)) // 수정하려는 댓글의 작성자 != 로그인 유저
             throw new RuntimeException("댓글 수정 권한이 없습니다.");
@@ -76,7 +81,8 @@ public class CommentService {
 
     // 댓글 삭제
     public void deleteComment(Long userId, Long commentId) {
-        Comment comment = commentRepository.findByCommentIdOrElseThrow(commentId);
+        Comment comment = commentRepository.findById(commentId).
+            orElseThrow(() -> new CustomException(ErrorCode.NOT_FOUND_COMMENT));;
 
         if(!comment.getUser().getId().equals(userId)) // 삭제하려는 댓글의 작성자 != 로그인 유저
             throw new RuntimeException("댓글 삭제 권한이 없습니다.");
